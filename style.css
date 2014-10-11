@@ -1,0 +1,84 @@
+/* copied from the original IWDRM */
+
+body {
+	font-family:  "andale mono", courier new, courier, mono-spaced;
+	font-size: 12px;
+	color: #000;
+        width: 500px;
+	margin: 20px auto 10px auto;
+	padding: 40px;
+	text-align: left;
+        background-color:#FFFFFF;
+}
+
+a {
+	background-color: #ffffff;
+	color: #000;
+	text-decoration: none;
+	border: none;
+}
+
+a img {
+	border: none;
+}
+a:hover {
+	background-color: #eeeeee;
+	color: #000;
+}
+
+ 
+.regular_post img {
+        max-width: 100%;
+}
+
+.permalink {
+    position: absolute;
+    display: block;	
+    margin-left: -35px;}
+
+h1 {
+    font-family: "helvetica neue", helvetica, arial, verdana, sans-serif;
+    color: #000;
+    font-size: 62px;
+    line-height: 78px;
+    text-transform: uppercase;
+    margin: 0;
+    padding: 0;
+    margin-left: -0px ;}
+
+h1 a:link,
+h1 a:active,
+h1 a:visited{
+   background-color: #eeeeee;}
+
+h2 {
+   font-family: "helvetica neue", helvetica, arial, verdana, sans-serif;
+   font-size: 40px;
+   line-height: 40px;
+   text-transform: uppercase;
+   margin-left: -3px;}
+
+.post {
+   margin-bottom: 3em;
+   margin-top: 3em;}
+
+.center {
+   text-align: center;
+}
+
+.right {
+   text-align: right;
+}
+
+.description{
+   margin-top: 10px;
+   padding: 0px;
+   border: 0px;
+   line-height: 24px;
+}
+
+.twitter{
+   margin-top: 3px;
+}
+
+.nav {padding:20px;}
