@@ -114,59 +114,101 @@ $(document).ready(function() {
 	// in order to detect them, we must store their ID here
 	var posts_with_deleted_gif = [];  // TODO
 
+	var resultsSeen = true;
+	// when this flag is true, we display a new question
+	// when it is false, we display the results
+
+	var goodAnswer;    // a reference to the good answer of the current question
+	var totalAnswers = 0;  // the number of questions answered
+	var goodAnswers  = 0;  // the number of good answers
+
 	$('.next').click(function() {
-		var done = false;
-		// infinite loop, in case we select a bad post, we must retry
-		while (done == false) {
-			// we get a random number
-			var n = Math.floor((Math.random() * number_of_posts));
+		// the player saw results, we go create a new question
+		if (resultsSeen == true) {
+			resultsSeen = false;
+			totalAnswers++;
 
-			// we check that this post is not bad, and if the AJAX request for it has completed
-			if (isValidPost(n) == false)
-				continue;
-
-			// TODO: we should check that the gif of this post has not been deleted
-
-			var answer1 = posts[n].movie_title;
-			// we get three random answers
-			var answer2; var answer3; var answer4;
-			var j = 0;
-			while (j < 3) {
-				var m = Math.floor((Math.random() * number_of_posts));
+			var done = false;
+			// infinite loop, in case we select a bad post, we must retry
+			while (done == false) {
+				// we get a random number
+				var n = Math.floor((Math.random() * number_of_posts));
 
 				// we check that this post is not bad, and if the AJAX request for it has completed
-				if (isValidPost(m) == false)
+				if (isValidPost(n) == false)
 					continue;
 
-				if (j == 0)
-					answer2 = posts[m].movie_title;
-				if (j == 1)
-					answer3 = posts[m].movie_title;
-				if (j == 2)
-					answer4 = posts[m].movie_title;
-				j++;
+				// TODO: we should check that the gif of this post has not been deleted
+
+				var answer1 = posts[n].movie_title;
+				// we get three random answers
+				var answer2; var answer3; var answer4;
+				var j = 0;
+				while (j < 3) {
+					var m = Math.floor((Math.random() * number_of_posts));
+
+					// we check that this post is not bad, and if the AJAX request for it has completed
+					if (isValidPost(m) == false)
+						continue;
+
+					if (j == 0)
+						answer2 = posts[m].movie_title;
+					if (j == 1)
+						answer3 = posts[m].movie_title;
+					if (j == 2)
+						answer4 = posts[m].movie_title;
+					j++;
+				}
+
+				goodAnswer = answer1;  // TODO: for now, good answer is always answer 1 ...
+
+				// we can suppose that we have a post with all the data (gif, movie title, citation)
+				$('#question').html(
+					'<div id="question"> \
+						<div id="post" style="text-align: center; border-top: 1px solid #aaa; width: 300px;"> \
+							<img align="center" src="' + posts[n].url_gif + '"> \
+							<a>' + posts[n].citation + '</a> \
+						</div> \
+					</div></br>');
+				$('#answers').html(
+					'<div id="answers"> \
+						<form action=""> \
+							<input type="radio" name="answer" value="' + answer1 + '">' + answer1 + '<br> \
+							<input type="radio" name="answer" value="' + answer2 + '">' + answer2 + '<br> \
+							<input type="radio" name="answer" value="' + answer3 + '">' + answer3 + '<br> \
+							<input type="radio" name="answer" value="' + answer4 + '">' + answer4 + ' \
+						</form> \
+					</div><br>');
+				$("#button").prop('value', 'Validate answer');
+
+				done = true;
+			}
+		}
+		// else, if the player just answered, we display the result
+		else {
+			resultsSeen = true;
+
+			var colorTag;
+			var buttonChecked = $('input[type="radio"][name="answer"]:checked').val();
+			if (typeof buttonChecked === "undefined") {
+				resultsSeen = false;
+				return;
 			}
 
-			// we can suppose that we have a post with all the data (gif, movie title, citation)
-			$('#question').html(
-				'<div id="question"> \
-					<div id="post" style="text-align: center; border-top: 1px solid #aaa; width: 300px;"> \
-						<img align="center" src="' + posts[n].url_gif + '"> \
-						<a>' + posts[n].citation + '</a> \
-					</div> \
-				</div></br>');
-			$('#answers').html(
-				'<div id="answers"> \
-					<form action=""> \
-						<input type="radio" name="answer" value="answer1">' + answer1 + '<br> \
-						<input type="radio" name="answer" value="answer2">' + answer2 + '<br> \
-						<input type="radio" name="answer" value="answer3">' + answer3 + '<br> \
-						<input type="radio" name="answer" value="answer4">' + answer4 + ' \
-					</form> \
-				</div><br>');
-			$("#button").prop('value', 'Validate answer');
+			if (buttonChecked.localeCompare(goodAnswer) == 0) {
+				colorTag = '<font color="green">';
+				goodAnswers++;
+			}
+			else {
+				colorTag = '<font color="red">';
+			}
 
-			done = true;
+			$('#answers').html('<div id="answers">'
+				+ colorTag + 'The good answer was: ' + goodAnswer + '</font></br></br>'
+				+ 'Ratio of good answers: ' + (goodAnswers/totalAnswers*100).toFixed(0) + " %" +
+				'</div><br>');
+			$("#button").prop('value', 'Next question');
+
 		}
 
 	});
