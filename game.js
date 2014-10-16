@@ -1,5 +1,10 @@
 $(document).ready(function() {
 
+	// even if the button is set to disabled in index.html, when we reload the page,
+	// it stays enabled so we must disable it manually
+	// (it MUST be disabled until we got all posts from IWDRM)
+	$('#button').attr('disabled', 'disabled');
+	
 	// we create an array which will contain, for each post:
 	// - the link to the gif
 	// - the citation
@@ -13,11 +18,18 @@ $(document).ready(function() {
 		this.bad_post    = false;  // flag, in case the gif has been deleted / or another problem
 	}
 
+	// we create the loading bar
+	var options = {
+		bg: '#000',
+		id: 'myNanoBar'
+	};
+	var nanobar = new Nanobar(options);
+
 	// we use Tumbler API: https://www.tumblr.com/docs/en/api/v2
 	var api_key = "4k2NGQU1cJZ4d1ZqrvKR9mnpUUmubGPlyUEzDZfiL5loPeIOzv";
 
 	// we first get the number of posts
-	var number_of_posts;
+	var number_of_posts; var stopFunction;
 	$.ajax({
 		type: 'GET',
 		url: 'http://api.tumblr.com/v2/blog/iwdrm.tumblr.com/info?api_key=' + api_key,
@@ -33,6 +45,10 @@ $(document).ready(function() {
 				getNextPosts(post_offset);  // we get the 20 next posts
 				post_offset += 20;          // the API only allows 20 posts at at time
 			}
+
+			// we must wait for all the data to be loaded before showing the "Play" button
+			// setTimeout(isAllDataLoaded(), 1000);
+			stopFunction = setInterval(isAllDataLoaded, 1000);
 		}
 	});
 
@@ -160,7 +176,29 @@ $(document).ready(function() {
 					j++;
 				}
 
-				goodAnswer = answer1;  // TODO: for now, good answer is always answer 1 ...
+				// we swap answers, so that good answer is not always the first
+				var goodAnswerNumber = Math.floor((Math.random() * 4 + 1)); // between 1 and 4
+				if (goodAnswerNumber == 1) {
+					goodAnswer = answer1;
+				}
+				if (goodAnswerNumber == 2) {
+					var tmp = answer1;
+					answer1 = answer2;
+					answer2 = tmp;
+					goodAnswer = answer2;
+				}
+				if (goodAnswerNumber == 3) {
+					var tmp = answer1;
+					answer1 = answer3;
+					answer3 = tmp;
+					goodAnswer = answer3;
+				}
+				if (goodAnswerNumber == 4) {
+					var tmp = answer1;
+					answer1 = answer4;
+					answer4 = tmp;
+					goodAnswer = answer4;
+				}
 
 				// we can suppose that we have a post with all the data (gif, movie title, citation)
 				$('#question').html(
@@ -173,10 +211,10 @@ $(document).ready(function() {
 				$('#answers').html(
 					'<div id="answers"> \
 						<form action=""> \
-							<input type="radio" name="answer" value="' + answer1 + '">' + answer1 + '<br> \
-							<input type="radio" name="answer" value="' + answer2 + '">' + answer2 + '<br> \
-							<input type="radio" name="answer" value="' + answer3 + '">' + answer3 + '<br> \
-							<input type="radio" name="answer" value="' + answer4 + '">' + answer4 + ' \
+							<input type="radio" name="answer" value="' + answer1 + '"> &nbsp;' + answer1 + '<br> \
+							<input type="radio" name="answer" value="' + answer2 + '"> &nbsp;' + answer2 + '<br> \
+							<input type="radio" name="answer" value="' + answer3 + '"> &nbsp;' + answer3 + '<br> \
+							<input type="radio" name="answer" value="' + answer4 + '"> &nbsp;' + answer4 + ' \
 						</form> \
 					</div><br>');
 				$("#button").prop('value', 'Validate answer');
@@ -224,6 +262,28 @@ $(document).ready(function() {
 			return false;
 		}
 		return true;
+	}
+
+	// the function to check if all the data has been loaded, and if we can display the "Play" button
+	function isAllDataLoaded() {
+		var i = 0; var quit = false; var numberOfPostsLoaded = 0;
+		for (i=0; i<number_of_posts; i++) {
+			if (typeof posts[i] === "undefined") {
+				quit = true;
+			}
+			else
+				numberOfPostsLoaded++;
+		}
+
+		nanobar.go(numberOfPostsLoaded / number_of_posts * 100); // we update the loading bar
+
+		if (quit == true)
+			return;
+
+		// if all posts were loaded
+		clearTimeout(stopFunction);
+		$("#button").prop('value', 'Start game');
+		$('#button').removeAttr('disabled');  // we enable it again
 	}
 
 
