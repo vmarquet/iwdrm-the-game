@@ -146,7 +146,7 @@ $(document).ready(function() {
 			totalAnswers++;
 
 			// we hide the answer from previous question
-			$('#answerResult').html('<div id="answerResult"></div>');
+			$('#answerResult').html('<div id="answerResult"></div><br>');
 
 			var done = false;
 			// infinite loop, in case we select a bad post, we must retry
@@ -214,10 +214,14 @@ $(document).ready(function() {
 				// we write all the possible answer in the form
 				$('#answersForm').html(
 					'<form id="answersForm"> \
-						<label class="radio"><input id="answer1" type="radio" name="answer" value="' + answer1 + '"> &nbsp;' + answer1 + '</label><br><br> \
-						<label class="radio"><input id="answer2" type="radio" name="answer" value="' + answer2 + '"> &nbsp;' + answer2 + '</label><br><br> \
-						<label class="radio"><input id="answer3" type="radio" name="answer" value="' + answer3 + '"> &nbsp;' + answer3 + '</label><br><br> \
-						<label class="radio"><input id="answer4" type="radio" name="answer" value="' + answer4 + '"> &nbsp;' + answer4 + '</label><br><br> \
+						<input class="radio-checkbox" id="answer1" type="radio" name="answer" value="' + answer1 + '"> \
+						<label for="answer1" class="radio-label">&nbsp;' + answer1 + '</label><br><br> \
+						<input class="radio-checkbox" id="answer2" type="radio" name="answer" value="' + answer2 + '"> \
+						<label for="answer2" class="radio-label">&nbsp;' + answer2 + '</label><br><br> \
+						<input class="radio-checkbox" id="answer3" type="radio" name="answer" value="' + answer3 + '"> \
+						<label for="answer3" class="radio-label">&nbsp;' + answer3 + '</label><br><br> \
+						<input class="radio-checkbox" id="answer4" type="radio" name="answer" value="' + answer4 + '"> \
+						<label for="answer4" class="radio-label">&nbsp;' + answer4 + '</label><br><br> \
 					</form>');
 				// we change the text on the button
 				$("#buttonNext").prop('value', 'Validate answer');
