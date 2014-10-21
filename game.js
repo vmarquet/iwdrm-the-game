@@ -3,7 +3,7 @@ $(document).ready(function() {
 	// even if the button is set to disabled in index.html, when we reload the page,
 	// it stays enabled so we must disable it manually
 	// (it MUST be disabled until we got all posts from IWDRM)
-	$('#button').attr('disabled', 'disabled');
+	$('#buttonStart').attr('disabled', 'disabled');
 	
 	// we create an array which will contain, for each post:
 	// - the link to the gif
@@ -138,11 +138,15 @@ $(document).ready(function() {
 	var totalAnswers = 0;  // the number of questions answered
 	var goodAnswers  = 0;  // the number of good answers
 
-	$('.next').click(function() {
+	$('#buttonNext').click(next); // we call next() function when button clicked
+	function next() {
 		// the player saw results, we go create a new question
 		if (resultsSeen == true) {
 			resultsSeen = false;
 			totalAnswers++;
+
+			// we hide the answer from previous question
+			$('#answerResult').html('<div id="answerResult"></div>');
 
 			var done = false;
 			// infinite loop, in case we select a bad post, we must retry
@@ -201,23 +205,22 @@ $(document).ready(function() {
 				}
 
 				// we can suppose that we have a post with all the data (gif, movie title, citation)
-				$('#question').html(
-					'<div id="question"> \
-						<div id="post" style="text-align: center; border-top: 1px solid #aaa; width: 300px;"> \
-							<img align="center" src="' + posts[n].url_gif + '"> \
-							<a>' + posts[n].citation + '</a> \
-						</div> \
-					</div></br>');
-				$('#answers').html(
-					'<div id="answers"> \
-						<form action=""> \
-							<input type="radio" name="answer" value="' + answer1 + '"> &nbsp;' + answer1 + '<br> \
-							<input type="radio" name="answer" value="' + answer2 + '"> &nbsp;' + answer2 + '<br> \
-							<input type="radio" name="answer" value="' + answer3 + '"> &nbsp;' + answer3 + '<br> \
-							<input type="radio" name="answer" value="' + answer4 + '"> &nbsp;' + answer4 + ' \
-						</form> \
-					</div><br>');
-				$("#button").prop('value', 'Validate answer');
+				// so we can ask a new question
+
+				// we display the gif and the citation
+				// $('#gif').html('<img id="gif" src="' + posts[n].url_gif + '">'); // doesn't work !? gif not displayed
+				$('#question').html('<div id="question"><img id="gif" src="'+ posts[n].url_gif +'" /><div id="citation"></div></div>');
+				$('#citation').html('<div id="citation"><p>' + posts[n].citation + '</p></div>');
+				// we write all the possible answer in the form
+				$('#answersForm').html(
+					'<form id="answersForm"> \
+						<input id="answer1" type="radio" name="answer" value="' + answer1 + '"> &nbsp;' + answer1 + '<br><br> \
+						<input id="answer2" type="radio" name="answer" value="' + answer2 + '"> &nbsp;' + answer2 + '<br><br> \
+						<input id="answer3" type="radio" name="answer" value="' + answer3 + '"> &nbsp;' + answer3 + '<br><br> \
+						<input id="answer4" type="radio" name="answer" value="' + answer4 + '"> &nbsp;' + answer4 + '<br><br> \
+					</form>');
+				// we change the text on the button
+				$("#buttonNext").prop('value', 'Validate answer');
 
 				done = true;
 			}
@@ -226,30 +229,32 @@ $(document).ready(function() {
 		else {
 			resultsSeen = true;
 
-			var colorTag;
+			var colorTag; var answerText;
 			var buttonChecked = $('input[type="radio"][name="answer"]:checked').val();
-			if (typeof buttonChecked === "undefined") {
-				resultsSeen = false;
+			if (typeof buttonChecked === "undefined") { // user didn't selected any of them
+				resultsSeen = false;  // so we don't display the results
 				return;
 			}
 
 			if (buttonChecked.localeCompare(goodAnswer) == 0) {
 				colorTag = '<font color="green">';
+				answerText = 'Good answer !'
 				goodAnswers++;
 			}
 			else {
 				colorTag = '<font color="red">';
+				answerText = 'The good answer is: ' + goodAnswer;
 			}
 
-			$('#answers').html('<div id="answers">'
-				+ colorTag + 'The good answer was: ' + goodAnswer + '</font></br></br>'
-				+ 'Ratio of good answers: ' + (goodAnswers/totalAnswers*100).toFixed(0) + " %" +
-				'</div><br>');
-			$("#button").prop('value', 'Next question');
+			$('#answerResult').html('<div id="answerResult"><p>'
+				+ colorTag + answerText + '</font></p>'
+				+ '<p>Ratio of good answers: ' + (goodAnswers/totalAnswers*100).toFixed(0) + " %" +
+				'</p></div>');
+			$("#buttonNext").prop('value', 'Next question');
 
 		}
 
-	});
+	}
 
 	// to check if the post is valid
 	// (sometimes, the gif have been removed due to copyright infringement, or there are others problems)
@@ -282,9 +287,18 @@ $(document).ready(function() {
 
 		// if all posts were loaded
 		clearTimeout(stopFunction);
-		$("#button").prop('value', 'Start game');
-		$('#button').removeAttr('disabled');  // we enable it again
+		$("#buttonStart").prop('value', 'Start game !');
+		$('#buttonStart').removeAttr('disabled');  // we enable it again
 	}
+	// the function called when "Start" button is clicked
+	$('#buttonStart').click(function() {
+		// we remove the start button
+		$("#buttonStart").hide();
+		// we display the game panel
+		$("#game").show();
+		// we launch the next function to display the first question
+		next();
+	});
 
 
 });

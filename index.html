@@ -2,26 +2,48 @@
 <html lang="en">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
-		<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 		<link rel="stylesheet" href="style.css">
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-		<script src="nanobar.min.js"></script>
+		<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+		<script src="nanobar.min.js"></script><!-- for the progress bar when loading the page -->
 		<script src="game.js"></script>
-		<title>IWDRM Game</title>
+		<title>IWDRM, The Game</title>
 	</head>
 	<body>
-		<h1 style="text-align: center;">IWDRM Game</h1>
-		</br></br>
-		<div id="question">
-			<!-- the gif and the citation will be inserted here -->
+		<header>IWDRM, The Game.</header>
+
+		<!-- the "Start" button, it is hidden after the game starts -->
+		<div style="text-align: center;">
+			<input id="buttonStart" type="button" value="Loading..." disabled>
 		</div>
-		<div id="answers">
-			<!-- the possible answers will be insterted here -->
+
+		<!-- the main game display, hidden before user clicks on "Start" button -->
+		<div id="game">
+
+			<!-- the left part, with the gif and the citation -->
+			<div id="question">
+				<img id="gif" src="" />
+				<div id="citation"></div>
+			</div>
+
+			<!-- the right part, with tha possible answers -->
+			<div id="answers">
+				<div id="answersMargin">
+					<!-- to display all the possible answers -->
+					<form id="answersForm">
+						<input type="radio" name="answer" value=""><br><br>
+						<input type="radio" name="answer" value=""><br><br>
+						<input type="radio" name="answer" value=""><br><br>
+						<input type="radio" name="answer" value=""><br><br>
+					</form>
+					<!-- to display the final answer -->
+					<div id="answerResult">
+					</div>
+					<!-- the button to validate an answer or go to next question -->
+					<input id="buttonNext" type="button" value="">
+				</div>
+			</div>
+
 		</div>
-		<div id="buttonDiv">
-			<input id="button" class="next" type="button" value="Loading..." disabled>
-		</div>
+		
 	</body>
 </html>
