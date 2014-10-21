@@ -214,10 +214,10 @@ $(document).ready(function() {
 				// we write all the possible answer in the form
 				$('#answersForm').html(
 					'<form id="answersForm"> \
-						<input id="answer1" type="radio" name="answer" value="' + answer1 + '"> &nbsp;' + answer1 + '<br><br> \
-						<input id="answer2" type="radio" name="answer" value="' + answer2 + '"> &nbsp;' + answer2 + '<br><br> \
-						<input id="answer3" type="radio" name="answer" value="' + answer3 + '"> &nbsp;' + answer3 + '<br><br> \
-						<input id="answer4" type="radio" name="answer" value="' + answer4 + '"> &nbsp;' + answer4 + '<br><br> \
+						<label class="radio"><input id="answer1" type="radio" name="answer" value="' + answer1 + '"> &nbsp;' + answer1 + '</label><br><br> \
+						<label class="radio"><input id="answer2" type="radio" name="answer" value="' + answer2 + '"> &nbsp;' + answer2 + '</label><br><br> \
+						<label class="radio"><input id="answer3" type="radio" name="answer" value="' + answer3 + '"> &nbsp;' + answer3 + '</label><br><br> \
+						<label class="radio"><input id="answer4" type="radio" name="answer" value="' + answer4 + '"> &nbsp;' + answer4 + '</label><br><br> \
 					</form>');
 				// we change the text on the button
 				$("#buttonNext").prop('value', 'Validate answer');
