@@ -103,7 +103,12 @@ label.radio-label {
 }
 #buttonStart:disabled {
 	color: #888888;
+	background-color: #FFF;
 	border: 2px #888888 solid;
+}
+#buttonStart:disabled:hover {
+	color: #FFF;
+	background-color: #888888;
 }
 #buttonNext::-moz-focus-inner { /* disable dotted line around button in Firefox */
 	border: 0;

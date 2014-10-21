@@ -16,6 +16,7 @@ $(document).ready(function() {
 		this.url_gif     = url_gif;
 		this.citation    = citation;
 		this.bad_post    = false;  // flag, in case the gif has been deleted / or another problem
+		this.already_asked = false;  // to not ask the same question twice
 	}
 
 	// we create the loading bar
@@ -26,7 +27,7 @@ $(document).ready(function() {
 	var nanobar = new Nanobar(options);
 
 	// we use Tumbler API: https://www.tumblr.com/docs/en/api/v2
-	var api_key = "4k2NGQU1cJZ4d1ZqrvKR9mnpUUmubGPlyUEzDZfiL5loPeIOzv";
+	var api_key = "78cdyoe5lH5JcWPKEgXKx2JoAPlxzO0dlVANLLxEwy6TOpJ7vY";
 
 	// we first get the number of posts
 	var number_of_posts; var stopFunction;
@@ -52,7 +53,11 @@ $(document).ready(function() {
 		}
 	});
 
-	
+	// some gifs have been deleted due to copyright infringement,
+	// in order to detect them, we must store their ID here
+	// to detect deleted gif, the quickest way is to check at http://iwdrm.tumblr.com/archive
+	// the id of the post can be found in the url of the post
+	var posts_with_deleted_gif = [2911978211, 2843408894, 2731508614, 2417942321, 1638746688, 1372024786];
 
 	// the function to fill the posts[] array with the data
 	function getNextPosts(post_offset) {
@@ -72,10 +77,17 @@ $(document).ready(function() {
 							break;
 						}
 
+						// we check if the gif was deletd for copyright infringement
+						// if yes, we mark it as a bad post
+						if (posts_with_deleted_gif.indexOf(data.response.posts[i].id) >= 0) {
+							posts[n] = new MoviePost(null, null, null);
+							posts[n].bad_post = true;
+							continue;
+						}
+
 						// we fill the array of posts with the data:
 						var movie_title;
 						var citation;
-
 						var url_gif;
 						// problem: the data of some posts is organized differently from others
 						// so we much check if fields are defined or not
@@ -113,6 +125,16 @@ $(document).ready(function() {
 							}
 							movie_title = split_tmp.split('<')[0];
 
+							// we make some checks on the movie title, often it is not the good one
+							// - there seem to be one bug with a Blade Runner gif,
+							//   citation and title are parsed wrong 
+							if (movie_title == ")\"" || movie_title == ")&#8221;" || movie_title == ""
+							|| movie_title == null || typeof movie_title === "undefined") {
+								posts[n] = new MoviePost(null, null, null);
+								posts[n].bad_post = true;
+								continue;
+							}
+
 							// debug
 							// console.log(citation);
 							// console.log(movie_title + "\n\n");
@@ -126,9 +148,6 @@ $(document).ready(function() {
 		}
 	}
 
-	// some gifs have been deleted due to copyright infringement,
-	// in order to detect them, we must store their ID here
-	var posts_with_deleted_gif = [];  // TODO
 
 	var resultsSeen = true;
 	// when this flag is true, we display a new question
@@ -148,86 +167,106 @@ $(document).ready(function() {
 			// we hide the answer from previous question
 			$('#answerResult').html('<div id="answerResult"></div><br>');
 
-			var done = false;
-			// infinite loop, in case we select a bad post, we must retry
+			var done = false; var n;
+			// infinite loop, in case we select a bad post, or a question we already asked, we must retry
+			// TODO: bug fix: there will be an infinite loop if a user answers to all the questions
 			while (done == false) {
 				// we get a random number
-				var n = Math.floor((Math.random() * number_of_posts));
+				n = Math.floor((Math.random() * number_of_posts));
 
 				// we check that this post is not bad, and if the AJAX request for it has completed
 				if (isValidPost(n) == false)
 					continue;
+				// we check that this question has not already been asked
+				if (posts[n].already_asked == true)
+					continue;
 
-				// TODO: we should check that the gif of this post has not been deleted
-
-				var answer1 = posts[n].movie_title;
-				// we get three random answers
-				var answer2; var answer3; var answer4;
-				var j = 0;
-				while (j < 3) {
-					var m = Math.floor((Math.random() * number_of_posts));
-
-					// we check that this post is not bad, and if the AJAX request for it has completed
-					if (isValidPost(m) == false)
-						continue;
-
-					if (j == 0)
-						answer2 = posts[m].movie_title;
-					if (j == 1)
-						answer3 = posts[m].movie_title;
-					if (j == 2)
-						answer4 = posts[m].movie_title;
-					j++;
-				}
-
-				// we swap answers, so that good answer is not always the first
-				var goodAnswerNumber = Math.floor((Math.random() * 4 + 1)); // between 1 and 4
-				if (goodAnswerNumber == 1) {
-					goodAnswer = answer1;
-				}
-				if (goodAnswerNumber == 2) {
-					var tmp = answer1;
-					answer1 = answer2;
-					answer2 = tmp;
-					goodAnswer = answer2;
-				}
-				if (goodAnswerNumber == 3) {
-					var tmp = answer1;
-					answer1 = answer3;
-					answer3 = tmp;
-					goodAnswer = answer3;
-				}
-				if (goodAnswerNumber == 4) {
-					var tmp = answer1;
-					answer1 = answer4;
-					answer4 = tmp;
-					goodAnswer = answer4;
-				}
-
-				// we can suppose that we have a post with all the data (gif, movie title, citation)
-				// so we can ask a new question
-
-				// we display the gif and the citation
-				// $('#gif').html('<img id="gif" src="' + posts[n].url_gif + '">'); // doesn't work !? gif not displayed
-				$('#question').html('<div id="question"><img id="gif" src="'+ posts[n].url_gif +'" /><div id="citation"></div></div>');
-				$('#citation').html('<div id="citation"><p>' + posts[n].citation + '</p></div>');
-				// we write all the possible answer in the form
-				$('#answersForm').html(
-					'<form id="answersForm"> \
-						<input class="radio-checkbox" id="answer1" type="radio" name="answer" value="' + answer1 + '"> \
-						<label for="answer1" class="radio-label">&nbsp;' + answer1 + '</label><br><br> \
-						<input class="radio-checkbox" id="answer2" type="radio" name="answer" value="' + answer2 + '"> \
-						<label for="answer2" class="radio-label">&nbsp;' + answer2 + '</label><br><br> \
-						<input class="radio-checkbox" id="answer3" type="radio" name="answer" value="' + answer3 + '"> \
-						<label for="answer3" class="radio-label">&nbsp;' + answer3 + '</label><br><br> \
-						<input class="radio-checkbox" id="answer4" type="radio" name="answer" value="' + answer4 + '"> \
-						<label for="answer4" class="radio-label">&nbsp;' + answer4 + '</label><br><br> \
-					</form>');
-				// we change the text on the button
-				$("#buttonNext").prop('value', 'Validate answer');
-
+				posts[n].already_asked = true;
 				done = true;
 			}
+
+			var answer1 = posts[n].movie_title;
+			// we get three random answers
+			var answer2; var answer3; var answer4;
+			var answer2_number; var answer3_number;  // to avoid choosing same movie twice
+			var j = 0;
+			while (j < 3) {
+				var m = Math.floor((Math.random() * number_of_posts));
+
+				// we check that this post is not bad, and if the AJAX request for it has completed
+				if (isValidPost(m) == false)
+					continue;
+
+				// if it's the same movie than the good answer, we choose another possible answer,
+				// else the good movie title will appear twice in the possible answers
+				if (isSameMovie(n, m) == true)
+					continue;
+
+				if (j == 0) {
+					answer2 = posts[m].movie_title;
+					answer2_number = m;
+				}
+				if (j == 1) {
+					if (isSameMovie(m, answer2_number) == true)
+						continue;
+					answer3 = posts[m].movie_title;
+					answer3_number = m;
+				}
+				if (j == 2) {
+					if (isSameMovie(m, answer2_number) == true || isSameMovie(m, answer3_number) == true)
+						continue;
+					answer4 = posts[m].movie_title;
+				}
+
+				j++;
+			}
+
+			// we swap answers, so that good answer is not always the first
+			var goodAnswerNumber = Math.floor((Math.random() * 4 + 1)); // between 1 and 4
+			if (goodAnswerNumber == 1) {
+				goodAnswer = answer1;
+			}
+			if (goodAnswerNumber == 2) {
+				var tmp = answer1;
+				answer1 = answer2;
+				answer2 = tmp;
+				goodAnswer = answer2;
+			}
+			if (goodAnswerNumber == 3) {
+				var tmp = answer1;
+				answer1 = answer3;
+				answer3 = tmp;
+				goodAnswer = answer3;
+			}
+			if (goodAnswerNumber == 4) {
+				var tmp = answer1;
+				answer1 = answer4;
+				answer4 = tmp;
+				goodAnswer = answer4;
+			}
+
+			// we can suppose that we have a post with all the data (gif, movie title, citation)
+			// so we can ask a new question
+
+			// we display the gif and the citation
+			// $('#gif').html('<img id="gif" src="' + posts[n].url_gif + '">'); // doesn't work !? gif not displayed
+			$('#question').html('<div id="question"><img id="gif" src="'+ posts[n].url_gif +'" /><div id="citation"></div></div>');
+			$('#citation').html('<div id="citation"><p>' + posts[n].citation + '</p></div>');
+			// we write all the possible answer in the form
+			$('#answersForm').html(
+				'<form id="answersForm"> \
+					<input class="radio-checkbox" id="answer1" type="radio" name="answer" value="' + answer1 + '"> \
+					<label for="answer1" class="radio-label">&nbsp;' + answer1 + '</label><br><br> \
+					<input class="radio-checkbox" id="answer2" type="radio" name="answer" value="' + answer2 + '"> \
+					<label for="answer2" class="radio-label">&nbsp;' + answer2 + '</label><br><br> \
+					<input class="radio-checkbox" id="answer3" type="radio" name="answer" value="' + answer3 + '"> \
+					<label for="answer3" class="radio-label">&nbsp;' + answer3 + '</label><br><br> \
+					<input class="radio-checkbox" id="answer4" type="radio" name="answer" value="' + answer4 + '"> \
+					<label for="answer4" class="radio-label">&nbsp;' + answer4 + '</label><br><br> \
+				</form>');
+			// we change the text on the button
+			$("#buttonNext").prop('value', 'Validate answer');
+
 		}
 		// else, if the player just answered, we display the result
 		else {
@@ -271,6 +310,14 @@ $(document).ready(function() {
 			return false;
 		}
 		return true;
+	}
+
+	// to check if two posts are about the same movie
+	function isSameMovie(n, m) {
+		if (posts[n].movie_title == posts[m].movie_title)
+			return true;
+		else
+			return false;
 	}
 
 	// the function to check if all the data has been loaded, and if we can display the "Play" button
