@@ -4,7 +4,7 @@ $(document).ready(function() {
 	// it stays enabled so we must disable it manually
 	// (it MUST be disabled until we got all posts from IWDRM)
 	$('#buttonStart').attr('disabled', 'disabled');
-	
+
 	// we create an array which will contain, for each post:
 	// - the link to the gif
 	// - the citation
@@ -153,7 +153,8 @@ $(document).ready(function() {
 	// when this flag is true, we display a new question
 	// when it is false, we display the results
 
-	var goodAnswer;    // a reference to the good answer of the current question
+	var goodAnswerNumber;  // the number of the good answer (1 / 2 / 3 / 4)
+	var goodAnswerText;    // the text of the good answer (teh movie title)
 	var totalAnswers = 0;  // the number of questions answered
 	var goodAnswers  = 0;  // the number of good answers
 
@@ -222,27 +223,24 @@ $(document).ready(function() {
 			}
 
 			// we swap answers, so that good answer is not always the first
-			var goodAnswerNumber = Math.floor((Math.random() * 4 + 1)); // between 1 and 4
+			goodAnswerNumber = Math.floor((Math.random() * 4 + 1)); // between 1 and 4
+			goodAnswerText = answer1;
 			if (goodAnswerNumber == 1) {
-				goodAnswer = answer1;
 			}
 			if (goodAnswerNumber == 2) {
 				var tmp = answer1;
 				answer1 = answer2;
 				answer2 = tmp;
-				goodAnswer = answer2;
 			}
 			if (goodAnswerNumber == 3) {
 				var tmp = answer1;
 				answer1 = answer3;
 				answer3 = tmp;
-				goodAnswer = answer3;
 			}
 			if (goodAnswerNumber == 4) {
 				var tmp = answer1;
 				answer1 = answer4;
 				answer4 = tmp;
-				goodAnswer = answer4;
 			}
 
 			// we can suppose that we have a post with all the data (gif, movie title, citation)
@@ -255,13 +253,13 @@ $(document).ready(function() {
 			// we write all the possible answer in the form
 			$('#answersForm').html(
 				'<form id="answersForm"> \
-					<input class="radio-checkbox" id="answer1" type="radio" name="answer" value="' + answer1 + '"> \
+					<input class="radio-checkbox" id="answer1" type="radio" name="answer" value="1"> \
 					<label for="answer1" class="radio-label">&nbsp;' + answer1 + '</label><br><br> \
-					<input class="radio-checkbox" id="answer2" type="radio" name="answer" value="' + answer2 + '"> \
+					<input class="radio-checkbox" id="answer2" type="radio" name="answer" value="2"> \
 					<label for="answer2" class="radio-label">&nbsp;' + answer2 + '</label><br><br> \
-					<input class="radio-checkbox" id="answer3" type="radio" name="answer" value="' + answer3 + '"> \
+					<input class="radio-checkbox" id="answer3" type="radio" name="answer" value="3"> \
 					<label for="answer3" class="radio-label">&nbsp;' + answer3 + '</label><br><br> \
-					<input class="radio-checkbox" id="answer4" type="radio" name="answer" value="' + answer4 + '"> \
+					<input class="radio-checkbox" id="answer4" type="radio" name="answer" value="4"> \
 					<label for="answer4" class="radio-label">&nbsp;' + answer4 + '</label><br><br> \
 				</form>');
 			// we change the text on the button
@@ -279,14 +277,14 @@ $(document).ready(function() {
 				return;
 			}
 
-			if (buttonChecked.localeCompare(goodAnswer) == 0) {
+			if (buttonChecked == goodAnswerNumber) {
 				colorTag = '<font color="green">';
 				answerText = 'Good answer !'
 				goodAnswers++;
 			}
 			else {
 				colorTag = '<font color="red">';
-				answerText = 'The good answer is: ' + goodAnswer;
+				answerText = 'The good answer is: ' + goodAnswerText;
 			}
 
 			$('#answerResult').html('<div id="answerResult"><p>'
@@ -343,8 +341,9 @@ $(document).ready(function() {
 	}
 	// the function called when "Start" button is clicked
 	$('#buttonStart').click(function() {
-		// we remove the start button
+		// we remove the start button and the intro text
 		$("#buttonStart").hide();
+		$("#intro").hide();
 		// we display the game panel
 		$("#game").show();
 		// we launch the next function to display the first question
